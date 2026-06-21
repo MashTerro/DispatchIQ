@@ -1,0 +1,32 @@
+# Backend
+dispatchiq-backend/target/
+dispatchiq-backend/*.iml
+dispatchiq-backend/.mvn/
+dispatchiq-backend/mvnw
+dispatchiq-backend/mvnw.cmd
+
+# Frontend
+dispatchiq-frontend/node_modules/
+dispatchiq-frontend/dist/
+dispatchiq-frontend/.vite/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+*.tar

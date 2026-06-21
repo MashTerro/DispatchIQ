@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dispatchiq-postgres
+    environment:
+      POSTGRES_DB: dispatchiq
+      POSTGRES_USER: dispatchiq
+      POSTGRES_PASSWORD: dispatchiq123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dispatchiq -d dispatchiq"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dispatchiq-network
+
+  backend:
+    build:
+      context: ./dispatchiq-backend
+      dockerfile: Dockerfile
+    container_name: dispatchiq-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dispatchiq
+      SPRING_DATASOURCE_USERNAME: dispatchiq
+      SPRING_DATASOURCE_PASSWORD: dispatchiq123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - dispatchiq-network
+
+  frontend:
+    build:
+      context: ./dispatchiq-frontend
+      dockerfile: Dockerfile
+    container_name: dispatchiq-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - dispatchiq-network
+
+volumes:
+  postgres_data:
+
+networks:
+  dispatchiq-network:
+    driver: bridge
